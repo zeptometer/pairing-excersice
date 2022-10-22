@@ -3,13 +3,18 @@ package vendingmachine
 class VendingMachine(private var moneyCount: MutableMap<Money, Int>) {
     constructor() : this(initializeMoneyCount())
 
-    fun insert(money: Money) {
-        val current = moneyCount[money]!!
-        moneyCount[money] = current + 1
+    fun insert(money: Money): Money? {
+        if (supportedMoneySet.contains(money)) {
+            val current = moneyCount[money] ?: 0
+            moneyCount[money] = current + 1
+            return null
+        }
+
+        return money
     }
 
     fun getAmount(): Int {
-        return Money.values().sumOf { moneyCount[it]!! * it.value  }
+        return supportedMoneySet.sumOf { (moneyCount[it] ?: 0) * it.value  }
     }
 
     fun returnMoney(): Map<Money, Int> {
@@ -17,14 +22,12 @@ class VendingMachine(private var moneyCount: MutableMap<Money, Int>) {
         moneyCount = initializeMoneyCount()
         return currentMap
     }
-}
 
-fun initializeMoneyCount(): MutableMap<Money, Int> {
-    return mutableMapOf(
-        Money.Ten to 0,
-        Money.Fifty to 0,
-        Money.Hundred to 0,
-        Money.FiveHundred to 0,
-        Money.Thousand to 0,
-    )
+    companion object {
+        private val supportedMoneySet = setOf(Money.Ten, Money.Fifty, Money.Hundred, Money.FiveHundred, Money.Thousand)
+
+        private fun initializeMoneyCount(): MutableMap<Money, Int> {
+            return supportedMoneySet.associateWith { 0 }.toMutableMap()
+        }
+    }
 }

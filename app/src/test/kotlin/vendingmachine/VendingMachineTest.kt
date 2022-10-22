@@ -18,6 +18,25 @@ internal class VendingMachineTest {
                 Arguments.of(Money.FiveHundred, 500),
                 Arguments.of(Money.Thousand, 1000)
             )
+
+        @JvmStatic
+        fun supportedMoney(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(Money.Ten),
+                Arguments.of(Money.Fifty),
+                Arguments.of(Money.Hundred),
+                Arguments.of(Money.FiveHundred),
+                Arguments.of(Money.Thousand)
+            )
+
+        @JvmStatic
+        fun unsupportedMoney(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(Money.One),
+                Arguments.of(Money.Five),
+                Arguments.of(Money.FiveThousand),
+                Arguments.of(Money.TenThousand),
+            )
     }
 
     @Test
@@ -84,5 +103,20 @@ internal class VendingMachineTest {
             Money.FiveHundred to 0,
             Money.Thousand to 1
         ))
+    }
+
+    @ParameterizedTest
+    @MethodSource("unsupportedMoney")
+    fun `1,5円玉,5000,10000円札を投入すると、それがそのまま返ってくる`(money: Money) {
+        val vm = VendingMachine()
+        assertEquals(vm.insert(money), money)
+        assertEquals(vm.getAmount(), 0)
+    }
+
+    @ParameterizedTest
+    @MethodSource("supportedMoney")
+    fun `それ以外の貨幣の場合、投入時に何も帰ってこない`(money: Money) {
+        val vm = VendingMachine()
+        assertEquals(vm.insert(money), null)
     }
 }
