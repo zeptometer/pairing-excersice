@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
-import kotlin.math.exp
 import kotlin.test.assertEquals
 
 internal class VendingMachineTest {
@@ -43,5 +42,47 @@ internal class VendingMachineTest {
         vm.insert(Money.Ten)
         vm.insert(Money.Thousand)
         assertEquals(vm.getAmount(), 1070)
+    }
+
+    @Test
+    fun `払い戻すと投入金額が0円になる`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Ten)
+        vm.returnMoney()
+        assertEquals(vm.getAmount(), 0)
+    }
+
+    @Test
+    fun `払い戻すと投入金額分の金が戻ってくる`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Ten)
+        vm.insert(Money.Ten)
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Fifty)
+        assertEquals(vm.returnMoney(), mapOf(
+            Money.Ten to 2,
+            Money.Fifty to 1,
+            Money.Hundred to 1,
+            Money.FiveHundred to 0,
+            Money.Thousand to 0
+        ))
+    }
+
+    @Test
+    fun `払い戻すと投入金額分の金が戻ってくる 2`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Ten)
+        vm.insert(Money.Thousand)
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Ten)
+        vm.insert(Money.Fifty)
+        assertEquals(vm.returnMoney(), mapOf(
+            Money.Ten to 2,
+            Money.Fifty to 1,
+            Money.Hundred to 2,
+            Money.FiveHundred to 0,
+            Money.Thousand to 1
+        ))
     }
 }
