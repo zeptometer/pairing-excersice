@@ -6,6 +6,8 @@
  * User Manual available at https://docs.gradle.org/7.5.1/userguide/building_java_projects.html
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.6.21"
@@ -33,10 +35,26 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // Use the Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+
+    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 application {
     // Define the main class for the application.
     mainClass.set("fizzbuzz.AppKt")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
+}
+
+// config JVM target to 1.8 for kotlin compilation tasks
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.jvmTarget = "1.8"
 }
