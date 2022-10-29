@@ -4,15 +4,14 @@ import vendingmachine.model.ItemInformation
 import vendingmachine.model.Money
 
 class VendingMachine(
-    private var moneyCount: MutableMap<Money, Int>,
+    private var insertedMoneyAmount: Int,
     private val itemInformation: ItemInformation
 ) {
-    constructor() : this(initializeMoneyCount(), ItemInformation(name = "コーラ", price = 120, stock = 5))
+    constructor() : this(0, ItemInformation(name = "コーラ", price = 120, stock = 5))
 
     fun insert(money: Money): Money? {
         if (supportedMoneySet.contains(money)) {
-            val current = moneyCount[money] ?: 0
-            moneyCount[money] = current + 1
+            insertedMoneyAmount += money.value
             return null
         }
 
@@ -20,13 +19,13 @@ class VendingMachine(
     }
 
     fun getAmount(): Int {
-        return MoneyModule.calculateAmount(moneyCount)
+        return insertedMoneyAmount
     }
 
     fun returnMoney(): Map<Money, Int> {
-        val currentMap = moneyCount
-        moneyCount = initializeMoneyCount()
-        return currentMap
+        val currentAmount = insertedMoneyAmount
+        insertedMoneyAmount = 0
+        return MoneyModule.toMoneyCount(currentAmount, supportedMoneySet)
     }
 
     fun getItemInformation(): ItemInformation {
@@ -35,9 +34,5 @@ class VendingMachine(
 
     companion object {
         private val supportedMoneySet = setOf(Money.Ten, Money.Fifty, Money.Hundred, Money.FiveHundred, Money.Thousand)
-
-        private fun initializeMoneyCount(): MutableMap<Money, Int> {
-            return supportedMoneySet.associateWith { 0 }.toMutableMap()
-        }
     }
 }

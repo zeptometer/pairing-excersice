@@ -92,7 +92,7 @@ internal class VendingMachineTest {
     }
 
     @Test
-    fun `払い戻すと投入金額分の金が戻ってくる 2`() {
+    fun `払い戻すと投入金額分の金が戻ってくる 2(同じ貨幣とは限らない)`() {
         val vm = VendingMachine()
         vm.insert(Money.Ten)
         vm.insert(Money.Thousand)
@@ -100,11 +100,12 @@ internal class VendingMachineTest {
         vm.insert(Money.Hundred)
         vm.insert(Money.Ten)
         vm.insert(Money.Fifty)
+        vm.insert(Money.Fifty)
         assertEquals(
             mapOf(
                 Money.Ten to 2,
-                Money.Fifty to 1,
-                Money.Hundred to 2,
+                Money.Fifty to 0,
+                Money.Hundred to 3,
                 Money.FiveHundred to 0,
                 Money.Thousand to 1
             ), vm.returnMoney()
