@@ -1,5 +1,6 @@
 package fizzbuzz
 
+import org.junit.jupiter.params.ParameterizedTest
 import kotlin.test.Test
 import kotlin.test.*
 

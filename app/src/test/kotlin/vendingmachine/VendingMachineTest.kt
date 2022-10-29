@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import vendingmachine.model.ItemInformation
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 
@@ -42,7 +43,7 @@ internal class VendingMachineTest {
     @Test
     fun `投入金額の初期値は0円である`() {
         val vm = VendingMachine()
-        assertEquals(vm.getAmount(), 0)
+        assertEquals(0, vm.getAmount())
     }
 
     @ParameterizedTest
@@ -50,7 +51,7 @@ internal class VendingMachineTest {
     fun `{money}円玉を投入でき、投入金額が{money}円になる`(money: Money, expectedAmount: Int) {
         val vm = VendingMachine()
         vm.insert(money)
-        assertEquals(vm.getAmount(), expectedAmount)
+        assertEquals(expectedAmount, vm.getAmount())
     }
 
     @Test
@@ -60,7 +61,7 @@ internal class VendingMachineTest {
         vm.insert(Money.Fifty)
         vm.insert(Money.Ten)
         vm.insert(Money.Thousand)
-        assertEquals(vm.getAmount(), 1070)
+        assertEquals(1070, vm.getAmount())
     }
 
     @Test
@@ -68,7 +69,7 @@ internal class VendingMachineTest {
         val vm = VendingMachine()
         vm.insert(Money.Ten)
         vm.returnMoney()
-        assertEquals(vm.getAmount(), 0)
+        assertEquals(0, vm.getAmount())
     }
 
     @Test
@@ -78,13 +79,15 @@ internal class VendingMachineTest {
         vm.insert(Money.Ten)
         vm.insert(Money.Hundred)
         vm.insert(Money.Fifty)
-        assertEquals(vm.returnMoney(), mapOf(
-            Money.Ten to 2,
-            Money.Fifty to 1,
-            Money.Hundred to 1,
-            Money.FiveHundred to 0,
-            Money.Thousand to 0
-        ))
+        assertEquals(
+            mapOf(
+                Money.Ten to 2,
+                Money.Fifty to 1,
+                Money.Hundred to 1,
+                Money.FiveHundred to 0,
+                Money.Thousand to 0
+            ), vm.returnMoney()
+        )
     }
 
     @Test
@@ -96,27 +99,38 @@ internal class VendingMachineTest {
         vm.insert(Money.Hundred)
         vm.insert(Money.Ten)
         vm.insert(Money.Fifty)
-        assertEquals(vm.returnMoney(), mapOf(
-            Money.Ten to 2,
-            Money.Fifty to 1,
-            Money.Hundred to 2,
-            Money.FiveHundred to 0,
-            Money.Thousand to 1
-        ))
+        assertEquals(
+            mapOf(
+                Money.Ten to 2,
+                Money.Fifty to 1,
+                Money.Hundred to 2,
+                Money.FiveHundred to 0,
+                Money.Thousand to 1
+            ), vm.returnMoney()
+        )
     }
 
     @ParameterizedTest
     @MethodSource("unsupportedMoney")
     fun `1,5円玉,5000,10000円札を投入すると、それがそのまま返ってくる`(money: Money) {
         val vm = VendingMachine()
-        assertEquals(vm.insert(money), money)
-        assertEquals(vm.getAmount(), 0)
+        assertEquals(money, vm.insert(money))
+        assertEquals(0, vm.getAmount())
     }
 
     @ParameterizedTest
     @MethodSource("supportedMoney")
     fun `それ以外の貨幣の場合、投入時に何も帰ってこない`(money: Money) {
         val vm = VendingMachine()
-        assertEquals(vm.insert(money), null)
+        assertEquals(null, vm.insert(money))
+    }
+
+    @Test
+    fun `在庫情報を取得する`() {
+        val vm = VendingMachine()
+        assertEquals(
+            ItemInformation(name = "コーラ", price = 120, stock = 5),
+            vm.getItemInformation()
+        )
     }
 }
