@@ -1,4 +1,4 @@
-package vendingmachine
+package vendingmachine.model
 
 enum class Money(val value: Int) {
     One(1),

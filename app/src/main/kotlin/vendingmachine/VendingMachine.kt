@@ -1,6 +1,7 @@
 package vendingmachine
 
 import vendingmachine.model.ItemInformation
+import vendingmachine.model.Money
 
 class VendingMachine(
     private var moneyCount: MutableMap<Money, Int>,
@@ -19,7 +20,7 @@ class VendingMachine(
     }
 
     fun getAmount(): Int {
-        return supportedMoneySet.sumOf { (moneyCount[it] ?: 0) * it.value }
+        return MoneyModule.calculateAmount(moneyCount)
     }
 
     fun returnMoney(): Map<Money, Int> {
