@@ -44,7 +44,7 @@ internal class VendingMachineTest {
     @Test
     fun `投入金額の初期値は0円である`() {
         val vm = VendingMachine()
-        assertEquals(0, vm.getAmount())
+        assertEquals(0, vm.getInsertedAmount())
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ internal class VendingMachineTest {
     fun `{money}円玉を投入でき、投入金額が{money}円になる`(money: Money, expectedAmount: Int) {
         val vm = VendingMachine()
         vm.insert(money)
-        assertEquals(expectedAmount, vm.getAmount())
+        assertEquals(expectedAmount, vm.getInsertedAmount())
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class VendingMachineTest {
         vm.insert(Money.Fifty)
         vm.insert(Money.Ten)
         vm.insert(Money.Thousand)
-        assertEquals(1070, vm.getAmount())
+        assertEquals(1070, vm.getInsertedAmount())
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class VendingMachineTest {
         val vm = VendingMachine()
         vm.insert(Money.Ten)
         vm.returnMoney()
-        assertEquals(0, vm.getAmount())
+        assertEquals(0, vm.getInsertedAmount())
     }
 
     @Test
@@ -117,7 +117,7 @@ internal class VendingMachineTest {
     fun `1,5円玉,5000,10000円札を投入すると、それがそのまま返ってくる`(money: Money) {
         val vm = VendingMachine()
         assertEquals(money, vm.insert(money))
-        assertEquals(0, vm.getAmount())
+        assertEquals(0, vm.getInsertedAmount())
     }
 
     @ParameterizedTest
@@ -131,8 +131,91 @@ internal class VendingMachineTest {
     fun `在庫情報を取得する`() {
         val vm = VendingMachine()
         assertEquals(
-            ItemInformation(name = "コーラ", price = 120, stock = 5),
-            vm.getItemInformation()
+            setOf(
+                ItemInformation(name = "コーラ", price = 120, stock = 5),
+                ItemInformation(name = "レッドブル", price = 200, stock = 5),
+                ItemInformation(name = "水", price = 100, stock = 5),
+            ),
+            vm.getItemInformations()
         )
+    }
+
+    @Test
+    fun `投入金額の点で、ジュースが購入できるかどうかを取得できる`() {
+        val vm = VendingMachine()
+
+        vm.insert(Money.Hundred)
+        assertEquals(setOf(), vm.getBuyableItems())
+
+        vm.insert(Money.Fifty)
+        assertEquals(setOf("コーラ", "水"), vm.getBuyableItems())
+    }
+
+    @Test
+    fun `在庫の点で、ジュースが購入できるかどうかを取得できる`() {
+        val vm = VendingMachine(0, 0, mutableSetOf(ItemInformation(name = "コーラ", price = 120, stock = 0)))
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Hundred)
+        assertEquals(setOf(), vm.getBuyableItems())
+    }
+
+    @Test
+    fun `ジュースが購入できるとき、購入すると ジュースの名前を 得る`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Hundred)
+
+        assertEquals("コーラ", vm.buy("コーラ"))
+    }
+
+    @Test
+    fun `ジュースが購入できないとき、購入しようとすると null を得る`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Hundred)
+
+        assertEquals(null, vm.buy("コーラ"))
+    }
+
+    @Test
+    fun `ジュースが購入できないとき、購入しようとすると null を得る 2`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Thousand)
+        assertEquals("コーラ", vm.buy("コーラ"))
+        assertEquals("コーラ", vm.buy("コーラ"))
+        assertEquals("コーラ", vm.buy("コーラ"))
+        assertEquals("コーラ", vm.buy("コーラ"))
+        assertEquals("コーラ", vm.buy("コーラ"))
+        assertEquals(null, vm.buy("コーラ"))
+    }
+
+    @Test
+    fun `ジュースを購入すると在庫が減る`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Hundred)
+        assertEquals(5, vm.getItemInformations().find { it.name == "コーラ" }?.stock)
+        vm.buy("コーラ")
+        assertEquals(4, vm.getItemInformations().find { it.name == "コーラ" }?.stock)
+    }
+
+    @Test
+    fun `ジュースを購入すると投入金額が減り、払い戻しされる金額は、ジュースを買って減った分の投入金額に等しい`() {
+        val vm = VendingMachine()
+        vm.insert(Money.Hundred)
+        vm.insert(Money.Hundred)
+        vm.buy("コーラ")
+        assertEquals(80, vm.getInsertedAmount())
+        assertEquals(80, MoneyModule.calculateAmount(vm.returnMoney()))
+    }
+
+    @Test
+    fun `売上金額を取得できる`() {
+        val vm  = VendingMachine()
+        assertEquals(0, vm.getSoldAmount())
+
+        vm.insert(Money.FiveHundred)
+        vm.buy("コーラ")
+
+        assertEquals(120, vm.getSoldAmount())
     }
 }
