@@ -33,14 +33,9 @@ class VendingMachine(
         return itemInformations
     }
 
-    fun getBuyableItems(): Set<String> {
-        val itemInformation = itemInformations.first()  // FIXME
-        return if (insertedMoneyAmount >= itemInformation.price && itemInformation.stock > 0) {
-            setOf(itemInformation.name)
-        } else {
-            setOf()
-        }
-    }
+    fun getBuyableItems(): Set<String> = itemInformations.filter {
+        insertedMoneyAmount >= it.price && it.stock > 0
+    }.map { it.name }.toSet()
 
     fun buy(name: String): String? {
         return if (name in getBuyableItems()) {

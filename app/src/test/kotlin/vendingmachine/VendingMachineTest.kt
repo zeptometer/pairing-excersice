@@ -145,7 +145,7 @@ internal class VendingMachineTest {
         val vm = VendingMachine()
 
         vm.insert(Money.Hundred)
-        assertEquals(setOf(), vm.getBuyableItems())
+        assertEquals(setOf("水"), vm.getBuyableItems())
 
         vm.insert(Money.Fifty)
         assertEquals(setOf("コーラ", "水"), vm.getBuyableItems())
